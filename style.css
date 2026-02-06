@@ -22,42 +22,84 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 30%, #f48fb1 70%, #ec407a 100%);
-  background-attachment: fixed;
+  background: #ffffff;
   overflow-x: hidden;
   padding: 1rem;
   position: relative;
 }
 
-/* Subtle floating hearts background */
-body::before {
-  content: '💕';
+/* ============================================
+   FAIRY ANIMATION
+   ============================================ */
+.fairy-container {
   position: fixed;
-  top: -20px;
-  left: 10%;
-  font-size: 2rem;
-  opacity: 0.15;
-  animation: floatHeart 6s ease-in-out infinite;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
+  overflow: hidden;
 }
 
-body::after {
-  content: '❤️';
-  position: fixed;
-  top: -20px;
-  right: 15%;
-  font-size: 1.5rem;
-  opacity: 0.12;
-  animation: floatHeart 8s ease-in-out 2s infinite;
-  pointer-events: none;
+.fairy {
+  position: absolute;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  opacity: 0.85;
+  z-index: 1;
+  animation: fairyBob 2s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+.fairy.right-side {
+  transform: scaleX(-1);
+}
+
+@keyframes fairyBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+.fairy.right-side {
+  animation: fairyBobRight 2s ease-in-out infinite;
+}
+
+@keyframes fairyBobRight {
+  0%, 100% { transform: scaleX(-1) translateY(0); }
+  50%      { transform: scaleX(-1) translateY(-10px); }
+}
+
+/* Flying hearts from fairy */
+.flying-heart {
+  position: absolute;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  opacity: 0;
   z-index: 0;
+  pointer-events: none;
 }
 
-@keyframes floatHeart {
-  0%   { transform: translateY(0) rotate(0deg); opacity: 0.15; }
-  50%  { transform: translateY(50vh) rotate(20deg); opacity: 0.25; }
-  100% { transform: translateY(110vh) rotate(-10deg); opacity: 0; }
+.flying-heart.to-right {
+  animation: shootRight 2.5s linear forwards;
+}
+
+.flying-heart.to-left {
+  animation: shootLeft 2.5s linear forwards;
+}
+
+@keyframes shootRight {
+  0%   { opacity: 0; transform: translateX(0) translateY(0) scale(0.5) rotate(0deg); }
+  5%   { opacity: 1; transform: translateX(5vw) translateY(-5px) scale(1) rotate(10deg); }
+  50%  { opacity: 1; transform: translateX(50vw) translateY(-20px) scale(1.1) rotate(0deg); }
+  95%  { opacity: 0.9; transform: translateX(95vw) translateY(5px) scale(0.9) rotate(-10deg); }
+  100% { opacity: 0; transform: translateX(100vw) translateY(10px) scale(0.7) rotate(-15deg); }
+}
+
+@keyframes shootLeft {
+  0%   { opacity: 0; transform: translateX(0) translateY(0) scale(0.5) rotate(0deg); }
+  5%   { opacity: 1; transform: translateX(-5vw) translateY(-5px) scale(1) rotate(-10deg); }
+  50%  { opacity: 1; transform: translateX(-50vw) translateY(-20px) scale(1.1) rotate(0deg); }
+  95%  { opacity: 0.9; transform: translateX(-95vw) translateY(5px) scale(0.9) rotate(10deg); }
+  100% { opacity: 0; transform: translateX(-100vw) translateY(10px) scale(0.7) rotate(15deg); }
 }
 
 /* ============================================
@@ -81,9 +123,9 @@ body::after {
   font-family: 'Dancing Script', cursive;
   font-size: clamp(1.6rem, 5vw, 2.8rem);
   font-weight: 700;
-  color: #880e4f;
+  color: #d42c2c;
   text-align: center;
-  text-shadow: 0 2px 8px rgba(136, 14, 79, 0.15);
+  text-shadow: 0 2px 10px rgba(211, 47, 47, 0.2);
   line-height: 1.3;
 }
 
@@ -92,11 +134,7 @@ body::after {
    ============================================ */
 .video-wrapper {
   width: 100%;
-  border-radius: 16px;
   overflow: hidden;
-  box-shadow:
-    0 8px 32px rgba(136, 14, 79, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   aspect-ratio: 16 / 9;
 }
@@ -116,7 +154,6 @@ body::after {
   height: 100%;
   display: block;
   object-fit: cover;
-  border-radius: inherit;
 }
 
 /* ============================================
@@ -134,7 +171,7 @@ body::after {
 
 .btn {
   border: none;
-  border-radius: 50px;
+  background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
@@ -147,25 +184,17 @@ body::after {
 
 /* YES button */
 .btn-yes {
-  background: linear-gradient(135deg, #e91e63, #c2185b);
-  color: #fff;
+  color: #d42c2c;
   font-size: clamp(1rem, 2.5vw, 1.25rem);
-  padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2.5rem);
-  box-shadow:
-    0 4px 16px rgba(233, 30, 99, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
   transition:
     transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
     font-size 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    padding 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.3s ease;
+    padding 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .btn-yes:hover {
-  box-shadow:
-    0 6px 24px rgba(233, 30, 99, 0.5),
-    0 2px 8px rgba(0, 0, 0, 0.15);
-  filter: brightness(1.08);
+  opacity: 0.8;
 }
 
 .btn-yes:active {
@@ -174,23 +203,15 @@ body::after {
 
 /* NO button */
 .btn-no {
-  background: linear-gradient(135deg, #78909c, #546e7a);
-  color: #fff;
+  color: #78909c;
   font-size: clamp(0.85rem, 2vw, 1rem);
-  padding: clamp(0.6rem, 1.5vw, 0.85rem) clamp(1.2rem, 3vw, 2rem);
-  box-shadow:
-    0 4px 12px rgba(84, 110, 122, 0.3),
-    0 2px 4px rgba(0, 0, 0, 0.08);
+  padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
   transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+    transform 0.3s ease;
 }
 
 .btn-no:hover {
-  box-shadow:
-    0 6px 20px rgba(84, 110, 122, 0.4),
-    0 2px 6px rgba(0, 0, 0, 0.12);
-  filter: brightness(1.05);
+  opacity: 0.7;
 }
 
 .btn-no:active {
@@ -209,6 +230,18 @@ body::after {
 
 .btn-no.shake {
   animation: shake 0.5s ease-in-out;
+}
+
+/* ============================================
+   FIREWORKS SPARK CANVAS
+   ============================================ */
+.fireworks-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  pointer-events: none;
 }
 
 /* ============================================
@@ -286,19 +319,7 @@ body::after {
   max-width: 90vw;
   max-height: 55vh;
   object-fit: contain;
-  border-radius: 16px;
-  filter: drop-shadow(0 0 30px rgba(255, 200, 0, 0.5));
   background: transparent;
-}
-
-/* Pulse glow on firework */
-.overlay.active .firework-img {
-  animation: fireworkPulse 2s ease-in-out 2s infinite;
-}
-
-@keyframes fireworkPulse {
-  0%, 100% { filter: drop-shadow(0 0 30px rgba(255, 200, 0, 0.5)); }
-  50%      { filter: drop-shadow(0 0 50px rgba(255, 100, 100, 0.7)); }
 }
 
 /* Celebration text */
@@ -306,18 +327,13 @@ body::after {
   font-family: 'Dancing Script', cursive;
   font-size: clamp(2rem, 6vw, 3.5rem);
   font-weight: 700;
-  color: #fff;
-  text-shadow:
-    0 0 20px rgba(255, 200, 0, 0.6),
-    0 0 40px rgba(233, 30, 99, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.3);
+  color: #d42c2c;
   text-align: center;
 }
 
 .celebration-sub {
   font-size: clamp(1rem, 3vw, 1.4rem);
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  color: #d42c2c;
   text-align: center;
 }
 
@@ -336,10 +352,6 @@ body::after {
 
   .title {
     font-size: clamp(1.4rem, 6vw, 1.8rem);
-  }
-
-  .video-wrapper {
-    border-radius: 12px;
   }
 
   .btn-container {
@@ -368,10 +380,6 @@ body::after {
   .container {
     max-width: 550px;
     gap: 1.5rem;
-  }
-
-  .video-wrapper {
-    border-radius: 16px;
   }
 
   .btn-yes {

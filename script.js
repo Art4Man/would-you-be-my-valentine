@@ -14,6 +14,183 @@
   const fireworkVideo = document.getElementById('fireworkVideo');
   const chromaCanvas = document.getElementById('chromaCanvas');
   const ctx = chromaCanvas.getContext('2d', { willReadFrequently: true });
+  const fairyContainer = document.getElementById('fairyContainer');
+
+  // ============================================
+  //  FAIRY HEART ANIMATION
+  // ============================================
+  const FAIRY_EMOJI = '🏹';
+  const HEART_EMOJI = '❤️';
+  let fairyAnimationRunning = true;
+  let fairyPaused = false;
+  let lastShootTime = 0;
+
+  /**
+   * Get random position for fairy (top 10% to 70% of screen height)
+   */
+  function getRandomY() {
+    return Math.random() * 60 + 10; // 10% to 70%
+  }
+
+  /**
+   * Create a fairy element at random position
+   */
+  function createFairy(side) {
+    const fairy = document.createElement('div');
+    fairy.className = `fairy ${side === 'right' ? 'right-side' : ''}`;
+    fairy.textContent = FAIRY_EMOJI;
+    
+    const yPos = getRandomY();
+    fairy.style.top = yPos + '%';
+    
+    if (side === 'left') {
+      fairy.style.left = '2%';
+    } else {
+      fairy.style.right = '2%';
+    }
+    
+    fairy.dataset.side = side;
+    fairy.dataset.yPos = yPos;
+    
+    return fairy;
+  }
+
+  /**
+   * Get random position (left/right side + random Y)
+   */
+  function getRandomSide() {
+    return Math.random() > 0.5 ? 'left' : 'right';
+  }
+
+  /**
+   * Teleport fairy: fade out, reappear at random position
+   */
+  function teleportFairy(fairy) {
+    // Fade out
+    fairy.style.transition = 'opacity 0.3s ease';
+    fairy.style.opacity = '0';
+
+    setTimeout(() => {
+      // Pick new random position on either side
+      const newSide = getRandomSide();
+      const newY = getRandomY();
+
+      // Reset position
+      fairy.style.left = '';
+      fairy.style.right = '';
+
+      if (newSide === 'left') {
+        fairy.style.left = '2%';
+        fairy.className = 'fairy';
+      } else {
+        fairy.style.right = '2%';
+        fairy.className = 'fairy right-side';
+      }
+
+      fairy.style.top = newY + '%';
+      fairy.dataset.side = newSide;
+      fairy.dataset.yPos = newY;
+
+      // Fade back in
+      setTimeout(() => {
+        fairy.style.transition = 'opacity 0.4s ease';
+        fairy.style.opacity = '0.85';
+      }, 100);
+    }, 350);
+  }
+
+  /**
+   * Create and shoot a heart from a fairy, then teleport the fairy
+   */
+  function shootHeart(fairy) {
+    if (!fairyAnimationRunning) return;
+    
+    const heart = document.createElement('div');
+    heart.className = 'flying-heart';
+    heart.textContent = HEART_EMOJI;
+    
+    const side = fairy.dataset.side;
+    const yPos = Number.parseFloat(fairy.dataset.yPos);
+    
+    heart.style.top = yPos + '%';
+    
+    if (side === 'left') {
+      heart.style.left = '6%';
+      heart.classList.add('to-right');
+    } else {
+      heart.style.right = '6%';
+      heart.classList.add('to-left');
+    }
+    
+    fairyContainer.appendChild(heart);
+
+    // Teleport fairy to new random position after shooting
+    teleportFairy(fairy);
+    
+    // Remove heart after animation completes
+    heart.addEventListener('animationend', () => {
+      heart.remove();
+    });
+  }
+
+  /**
+   * Spawn fairies and start shooting hearts randomly
+   */
+  function startFairyAnimation() {
+    // Clear any existing fairies
+    fairyContainer.innerHTML = '';
+    
+    // Create single cupid on a random side
+    const cupid = createFairy(getRandomSide());
+    fairyContainer.appendChild(cupid);
+    
+    // Shoot hearts at random intervals
+    function scheduleShoot(fairy) {
+      if (!fairyAnimationRunning) return;
+      
+      const delay = Math.random() * 2500 + 1500; // 1.5-4 seconds
+      
+      setTimeout(() => {
+        if (!fairyAnimationRunning) return;
+
+        // Skip if tab is hidden — don't pile up hearts
+        if (document.hidden || fairyPaused) {
+          scheduleShoot(fairy);
+          return;
+        }
+        
+        shootHeart(fairy);
+        scheduleShoot(fairy);
+      }, delay);
+    }
+    
+    scheduleShoot(cupid);
+  }
+
+  /**
+   * Stop fairy animation
+   */
+  function stopFairyAnimation() {
+    fairyAnimationRunning = false;
+    if (fairyContainer) {
+      fairyContainer.innerHTML = '';
+    }
+  }
+
+  // Start fairy animation on load
+  document.addEventListener('DOMContentLoaded', startFairyAnimation);
+
+  // Pause/resume fairy animation when tab visibility changes
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      fairyPaused = true;
+      // Remove any in-flight hearts so they don't pile up
+      const hearts = fairyContainer.querySelectorAll('.flying-heart');
+      hearts.forEach(h => h.remove());
+    } else {
+      fairyPaused = false;
+    }
+  });
 
   // --- Chroma Key Settings ---
   // Adjust these thresholds if the green removal isn't perfect for your video
@@ -148,6 +325,217 @@
   });
 
   // ============================================
+  //  FIREWORKS PARTICLE SYSTEM (Google-style)
+  // ============================================
+  const fwCanvas = document.getElementById('fireworksCanvas');
+  const fwCtx = fwCanvas.getContext('2d');
+  let particles = [];
+  let rockets = [];
+  let fireworksRunning = false;
+
+  const SPARK_COLORS = [
+    '#ff1744', '#ff4081', '#f50057', '#d50000',  // reds/pinks
+    '#ffab00', '#ffd600', '#ff6d00', '#ff9100',  // golds/oranges
+    '#ffffff', '#e0e0e0',                          // whites
+    '#7c4dff', '#651fff', '#6200ea',               // purples
+    '#00e5ff', '#18ffff',                          // cyans
+  ];
+
+  function resizeFireworksCanvas() {
+    fwCanvas.width = window.innerWidth;
+    fwCanvas.height = window.innerHeight;
+  }
+
+  window.addEventListener('resize', resizeFireworksCanvas);
+  resizeFireworksCanvas();
+
+  /**
+   * A rocket that flies up then explodes
+   */
+  function createRocket(x, targetY) {
+    return {
+      x: x,
+      y: fwCanvas.height,
+      targetY: targetY,
+      speed: Math.random() * 3 + 4,
+      trail: [],
+      alive: true,
+    };
+  }
+
+  /**
+   * A spark particle from an explosion
+   */
+  function createSpark(x, y) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 5 + 1.5;
+    const color = SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)];
+    return {
+      x: x,
+      y: y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1.0,
+      decay: Math.random() * 0.015 + 0.008,
+      color: color,
+      size: Math.random() * 3 + 1,
+      gravity: 0.04,
+      trail: [],
+    };
+  }
+
+  /**
+   * Explode a rocket into sparks
+   */
+  function explodeRocket(x, y) {
+    const count = Math.floor(Math.random() * 60) + 50;
+    for (let i = 0; i < count; i++) {
+      particles.push(createSpark(x, y));
+    }
+  }
+
+  /**
+   * Launch a rocket from a random X position
+   */
+  function launchRocket() {
+    const x = Math.random() * fwCanvas.width * 0.8 + fwCanvas.width * 0.1;
+    const targetY = Math.random() * fwCanvas.height * 0.4 + fwCanvas.height * 0.1;
+    rockets.push(createRocket(x, targetY));
+  }
+
+  /**
+   * Update and draw all particles and rockets
+   */
+  function fireworksLoop() {
+    if (!fireworksRunning) return;
+
+    fwCtx.globalCompositeOperation = 'destination-out';
+    fwCtx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    fwCtx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
+    fwCtx.globalCompositeOperation = 'lighter';
+
+    // Update rockets
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const r = rockets[i];
+      
+      // Trail
+      r.trail.push({ x: r.x, y: r.y });
+      if (r.trail.length > 8) r.trail.shift();
+
+      // Draw trail
+      for (let t = 0; t < r.trail.length; t++) {
+        const alpha = t / r.trail.length * 0.6;
+        fwCtx.beginPath();
+        fwCtx.arc(r.trail[t].x, r.trail[t].y, 2, 0, Math.PI * 2);
+        fwCtx.fillStyle = `rgba(255, 200, 100, ${alpha})`;
+        fwCtx.fill();
+      }
+
+      // Draw rocket head
+      fwCtx.beginPath();
+      fwCtx.arc(r.x, r.y, 3, 0, Math.PI * 2);
+      fwCtx.fillStyle = '#fff';
+      fwCtx.fill();
+
+      // Move up
+      r.y -= r.speed;
+      r.x += (Math.random() - 0.5) * 0.5;
+
+      // Explode when reaching target
+      if (r.y <= r.targetY) {
+        explodeRocket(r.x, r.y);
+        rockets.splice(i, 1);
+      }
+    }
+
+    // Update spark particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+
+      // Trail
+      p.trail.push({ x: p.x, y: p.y, life: p.life });
+      if (p.trail.length > 5) p.trail.shift();
+
+      // Draw trail
+      for (let t = 0; t < p.trail.length; t++) {
+        const pt = p.trail[t];
+        const alpha = (t / p.trail.length) * pt.life * 0.4;
+        fwCtx.beginPath();
+        fwCtx.arc(pt.x, pt.y, p.size * 0.5, 0, Math.PI * 2);
+        fwCtx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+        // Fallback for hex colors
+        fwCtx.globalAlpha = alpha;
+        fwCtx.fillStyle = p.color;
+        fwCtx.fill();
+        fwCtx.globalAlpha = 1;
+      }
+
+      // Draw spark
+      fwCtx.beginPath();
+      fwCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      fwCtx.globalAlpha = p.life;
+      fwCtx.fillStyle = p.color;
+      fwCtx.fill();
+      fwCtx.globalAlpha = 1;
+
+      // Physics
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += p.gravity;
+      p.vx *= 0.99;
+      p.life -= p.decay;
+
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+      }
+    }
+
+    requestAnimationFrame(fireworksLoop);
+  }
+
+  /**
+   * Start the fireworks show — launch multiple rockets in waves
+   */
+  function startFireworks() {
+    fireworksRunning = true;
+    resizeFireworksCanvas();
+    fireworksLoop();
+
+    // Wave 1: 3 rockets immediately
+    for (let i = 0; i < 3; i++) {
+      setTimeout(launchRocket, i * 200);
+    }
+
+    // Wave 2: 4 rockets after 0.8s
+    setTimeout(() => {
+      for (let i = 0; i < 4; i++) {
+        setTimeout(launchRocket, i * 150);
+      }
+    }, 800);
+
+    // Wave 3: 3 rockets after 1.8s
+    setTimeout(() => {
+      for (let i = 0; i < 3; i++) {
+        setTimeout(launchRocket, i * 200);
+      }
+    }, 1800);
+
+    // Continuous random rockets for 8 seconds
+    let continuousInterval = setInterval(() => {
+      if (!fireworksRunning) {
+        clearInterval(continuousInterval);
+        return;
+      }
+      launchRocket();
+    }, 600);
+
+    // Stop after 10 seconds
+    setTimeout(() => {
+      clearInterval(continuousInterval);
+    }, 10000);
+  }
+
+  // ============================================
   //  YES BUTTON HANDLER
   // ============================================
   btnYes.addEventListener('click', function () {
@@ -158,13 +546,16 @@
     // 1. Activate the overlay (starts dim animation)
     overlay.classList.add('active');
 
-    // 2. Play the firework video
+    // 2. Launch fireworks sparks
+    startFireworks();
+
+    // 3. Play the firework video
     if (fireworkVideo) {
       fireworkVideo.currentTime = 0;
       fireworkVideo.play().catch(() => {});
     }
 
-    // 3. After dim phase completes (~1.2s), hide main content
+    // 4. After dim phase completes (~1.2s), hide main content
     setTimeout(() => {
       mainContent.style.opacity = '0';
       mainContent.style.transition = 'opacity 0.4s ease';
@@ -174,9 +565,12 @@
         valentineVideo.pause();
         stopChromaKey();
       }
+
+      // Stop fairy animation
+      stopFairyAnimation();
     }, 1000);
 
-    // 4. After full animation, remove main content from flow
+    // 5. After full animation, remove main content from flow
     setTimeout(() => {
       mainContent.style.display = 'none';
     }, 2500);
