@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  valentine:
+    build: .
+    container_name: valentine-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - DOMAIN=valentine.yourdomain.com  # subdomain
+
+volumes:
+  caddy_data:
+  caddy_config:

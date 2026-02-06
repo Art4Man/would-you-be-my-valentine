@@ -1,0 +1,10 @@
+{$DOMAIN} {
+    root * /srv
+    file_server
+    encode gzip
+
+    header {
+        # Cache media files for 30 days
+        Cache-Control "public, max-age=2592000"
+    }
+}
