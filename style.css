@@ -1,0 +1,453 @@
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100dvh;
+  min-height: 100vh; /* fallback */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 30%, #f48fb1 70%, #ec407a 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+  padding: 1rem;
+  position: relative;
+}
+
+/* Subtle floating hearts background */
+body::before {
+  content: '💕';
+  position: fixed;
+  top: -20px;
+  left: 10%;
+  font-size: 2rem;
+  opacity: 0.15;
+  animation: floatHeart 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '❤️';
+  position: fixed;
+  top: -20px;
+  right: 15%;
+  font-size: 1.5rem;
+  opacity: 0.12;
+  animation: floatHeart 8s ease-in-out 2s infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes floatHeart {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+  50%  { transform: translateY(50vh) rotate(20deg); opacity: 0.25; }
+  100% { transform: translateY(110vh) rotate(-10deg); opacity: 0; }
+}
+
+/* ============================================
+   MAIN CONTAINER
+   ============================================ */
+.container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  z-index: 1;
+  padding: 1.5rem;
+}
+
+/* ============================================
+   TITLE
+   ============================================ */
+.title {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
+  font-weight: 700;
+  color: #880e4f;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(136, 14, 79, 0.15);
+  line-height: 1.3;
+}
+
+/* ============================================
+   VIDEO
+   ============================================ */
+.video-wrapper {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 32px rgba(136, 14, 79, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+
+.video-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+  flex-wrap: wrap;
+  width: 100%;
+  min-height: 80px;
+}
+
+.btn {
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* YES button */
+.btn-yes {
+  background: linear-gradient(135deg, #e91e63, #c2185b);
+  color: #fff;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 4vw, 2.5rem);
+  box-shadow:
+    0 4px 16px rgba(233, 30, 99, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    font-size 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    padding 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease;
+}
+
+.btn-yes:hover {
+  box-shadow:
+    0 6px 24px rgba(233, 30, 99, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.08);
+}
+
+.btn-yes:active {
+  transform: scale(0.96);
+}
+
+/* NO button */
+.btn-no {
+  background: linear-gradient(135deg, #78909c, #546e7a);
+  color: #fff;
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  padding: clamp(0.6rem, 1.5vw, 0.85rem) clamp(1.2rem, 3vw, 2rem);
+  box-shadow:
+    0 4px 12px rgba(84, 110, 122, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.btn-no:hover {
+  box-shadow:
+    0 6px 20px rgba(84, 110, 122, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  filter: brightness(1.05);
+}
+
+.btn-no:active {
+  transform: scale(0.96);
+}
+
+/* Shake animation for No button on click */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%  { transform: translateX(-6px) rotate(-2deg); }
+  30%  { transform: translateX(5px) rotate(1deg); }
+  45%  { transform: translateX(-4px) rotate(-1deg); }
+  60%  { transform: translateX(3px) rotate(0.5deg); }
+  75%  { transform: translateX(-2px); }
+}
+
+.btn-no.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* ============================================
+   OVERLAY — FIREWORK CELEBRATION
+   ============================================ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.overlay.active {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Dim layer */
+.overlay-dim {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  z-index: 1;
+}
+
+.overlay.active .overlay-dim {
+  animation: dimSequence 2.4s ease forwards;
+}
+
+@keyframes dimSequence {
+  /* Phase 1: Dim to dark */
+  0%   { opacity: 0; }
+  30%  { opacity: 0.85; }
+  /* Phase 2: Hold dark */
+  45%  { opacity: 0.85; }
+  /* Phase 3: Flash bright */
+  55%  { opacity: 0; background: #fff; }
+  65%  { opacity: 0.6; background: #fff; }
+  /* Phase 4: Fade to transparent */
+  100% { opacity: 0; background: transparent; }
+}
+
+/* Celebration content */
+.celebration {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.overlay.active .celebration {
+  animation: celebrationReveal 1s ease-out 1.2s forwards;
+}
+
+@keyframes celebrationReveal {
+  0%   { opacity: 0; transform: scale(0.5); }
+  60%  { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Firework video */
+.firework-img {
+  width: clamp(200px, 70vw, 500px);
+  max-width: 90vw;
+  max-height: 55vh;
+  object-fit: contain;
+  border-radius: 16px;
+  filter: drop-shadow(0 0 30px rgba(255, 200, 0, 0.5));
+  background: transparent;
+}
+
+/* Pulse glow on firework */
+.overlay.active .firework-img {
+  animation: fireworkPulse 2s ease-in-out 2s infinite;
+}
+
+@keyframes fireworkPulse {
+  0%, 100% { filter: drop-shadow(0 0 30px rgba(255, 200, 0, 0.5)); }
+  50%      { filter: drop-shadow(0 0 50px rgba(255, 100, 100, 0.7)); }
+}
+
+/* Celebration text */
+.celebration-text {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 700;
+  color: #fff;
+  text-shadow:
+    0 0 20px rgba(255, 200, 0, 0.6),
+    0 0 40px rgba(233, 30, 99, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.celebration-sub {
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+/* ============================================
+   RESPONSIVE — PHONE (≤ 430px, iPhone 15 Pro)
+   ============================================ */
+@media (max-width: 430px) {
+  body {
+    padding: 0.75rem;
+  }
+
+  .container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .title {
+    font-size: clamp(1.4rem, 6vw, 1.8rem);
+  }
+
+  .video-wrapper {
+    border-radius: 12px;
+  }
+
+  .btn-container {
+    gap: 0.75rem;
+  }
+
+  .btn-yes {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .btn-no {
+    font-size: 0.85rem;
+    padding: 0.6rem 1.2rem;
+  }
+
+  .firework-img {
+    width: 80vw;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — TABLET (431px – 1024px, iPad Pro)
+   ============================================ */
+@media (min-width: 431px) and (max-width: 1024px) {
+  .container {
+    max-width: 550px;
+    gap: 1.5rem;
+  }
+
+  .video-wrapper {
+    border-radius: 16px;
+  }
+
+  .btn-yes {
+    font-size: 1.15rem;
+    padding: 0.9rem 2rem;
+  }
+
+  .btn-no {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.75rem;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — DESKTOP (≥ 1025px)
+   ============================================ */
+@media (min-width: 1025px) {
+  .container {
+    max-width: 600px;
+    gap: 2rem;
+  }
+
+  .btn-yes {
+    font-size: 1.25rem;
+    padding: 1rem 2.5rem;
+  }
+
+  .btn-no {
+    font-size: 1rem;
+    padding: 0.85rem 2rem;
+  }
+}
+
+/* ============================================
+   LANDSCAPE PHONES
+   ============================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+  .container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90vw;
+    gap: 0.75rem;
+    padding: 0.5rem;
+  }
+
+  .title {
+    width: 100%;
+    font-size: 1.2rem;
+  }
+
+  .video-wrapper {
+    width: 45%;
+    max-height: 70vh;
+  }
+
+  .btn-container {
+    width: 45%;
+    flex-direction: column;
+  }
+
+  .firework-img {
+    max-height: 60vh;
+  }
+}
+
+/* ============================================
+   SAFE AREA (NOTCH / DYNAMIC ISLAND)
+   ============================================ */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+/* ============================================
+   PREFERS REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

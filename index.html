@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Would You Be My Valentine? 💕</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="container" id="mainContent">
+
+    <!-- Heading -->
+    <h1 class="title">Would You Be My Valentine? 💕</h1>
+
+    <!-- Video -->
+    <div class="video-wrapper">
+      <video
+        id="valentineVideo"
+        autoplay
+        loop
+        muted
+        playsinline
+        preload="metadata"
+      >
+        <source src="assets/video.MP4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-container" id="btnContainer">
+      <button class="btn btn-yes" id="btnYes">Yes! 💖</button>
+      <button class="btn btn-no" id="btnNo">No</button>
+    </div>
+
+  </main>
+
+  <!-- ===== FIREWORK CELEBRATION OVERLAY ===== -->
+  <div class="overlay" id="overlay">
+    <div class="overlay-dim" id="overlayDim"></div>
+    <div class="celebration" id="celebration">
+      <video
+        class="firework-img"
+        id="fireworkVideo"
+        autoplay
+        loop
+        muted
+        playsinline
+        preload="metadata"
+      >
+        <source src="assets/firework.mp4" type="video/mp4">
+      </video>
+      <h2 class="celebration-text">Yaaay! 🥰🎉</h2>
+      <p class="celebration-sub">I knew you'd say yes! ❤️</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
