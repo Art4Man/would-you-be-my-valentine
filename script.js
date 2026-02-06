@@ -546,7 +546,13 @@
     // 1. Activate the overlay (starts dim animation)
     overlay.classList.add('active');
 
-    // 2. Launch fireworks sparks
+    // 2. Play firework sound effect
+    const fireworkSound = new Audio('assets/firework-sound.m4a');
+    fireworkSound.volume = 1.0;
+    fireworkSound.loop = true;
+    fireworkSound.play().catch(() => {});
+
+    // 3. Launch fireworks sparks
     startFireworks();
 
     // 3. Play the firework video
@@ -584,19 +590,29 @@
       // Start chroma key once video has enough data
       valentineVideo.addEventListener('playing', startChromaKey);
 
-      // Attempt to play (catches autoplay rejection on some browsers)
+      // Play muted first (autoplay works muted)
       const playPromise = valentineVideo.play();
       if (playPromise !== undefined) {
         playPromise.catch(function () {
-          // Autoplay was prevented — user will need to interact
-          console.log('Autoplay prevented, user interaction required.');
-          // Start chroma on first user tap
-          document.addEventListener('click', function onFirstClick() {
-            valentineVideo.play().then(startChromaKey).catch(() => {});
-            document.removeEventListener('click', onFirstClick);
-          });
+          console.log('Autoplay prevented, waiting for interaction.');
         });
       }
+
+      // Unmute on first user interaction (click/touch anywhere)
+      function unmuteOnInteraction() {
+        if (valentineVideo.muted) {
+          valentineVideo.muted = false;
+        }
+        // Also ensure video is playing (in case autoplay was blocked)
+        if (valentineVideo.paused) {
+          valentineVideo.play().then(startChromaKey).catch(() => {});
+        }
+        document.removeEventListener('click', unmuteOnInteraction);
+        document.removeEventListener('touchstart', unmuteOnInteraction);
+      }
+
+      document.addEventListener('click', unmuteOnInteraction);
+      document.addEventListener('touchstart', unmuteOnInteraction);
     }
   });
 
