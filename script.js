@@ -12,6 +12,76 @@
   const overlay = document.getElementById('overlay');
   const valentineVideo = document.getElementById('valentineVideo');
   const fireworkVideo = document.getElementById('fireworkVideo');
+  const chromaCanvas = document.getElementById('chromaCanvas');
+  const ctx = chromaCanvas.getContext('2d', { willReadFrequently: true });
+
+  // --- Chroma Key Settings ---
+  // Adjust these thresholds if the green removal isn't perfect for your video
+  const CHROMA_THRESHOLD = 100;  // How green a pixel must be to remove (lower = stricter)
+  const CHROMA_SMOOTHING = 0.15; // Edge softness (0 = hard edge, higher = softer)
+
+  let chromaRunning = false;
+
+  /**
+   * Process a single video frame — remove green pixels
+   */
+  function processChromaFrame() {
+    if (!chromaRunning || valentineVideo.paused || valentineVideo.ended) {
+      return;
+    }
+
+    // Match canvas size to video's native resolution
+    if (chromaCanvas.width !== valentineVideo.videoWidth ||
+        chromaCanvas.height !== valentineVideo.videoHeight) {
+      chromaCanvas.width = valentineVideo.videoWidth;
+      chromaCanvas.height = valentineVideo.videoHeight;
+    }
+
+    // Draw current frame
+    ctx.drawImage(valentineVideo, 0, 0, chromaCanvas.width, chromaCanvas.height);
+
+    // Read pixel data
+    const frame = ctx.getImageData(0, 0, chromaCanvas.width, chromaCanvas.height);
+    const data = frame.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      // Detect green: green channel significantly higher than red and blue
+      const greenDominance = g - Math.max(r, b);
+
+      if (greenDominance > CHROMA_THRESHOLD) {
+        // Fully green pixel — make transparent
+        data[i + 3] = 0;
+      } else if (greenDominance > CHROMA_THRESHOLD * (1 - CHROMA_SMOOTHING)) {
+        // Edge pixel — partial transparency for smoother edges
+        const ratio = (greenDominance - CHROMA_THRESHOLD * (1 - CHROMA_SMOOTHING)) /
+                      (CHROMA_THRESHOLD * CHROMA_SMOOTHING);
+        data[i + 3] = Math.round(255 * (1 - ratio));
+      }
+    }
+
+    ctx.putImageData(frame, 0, 0);
+    requestAnimationFrame(processChromaFrame);
+  }
+
+  /**
+   * Start chroma key rendering loop
+   */
+  function startChromaKey() {
+    if (chromaRunning) return;
+    chromaRunning = true;
+    requestAnimationFrame(processChromaFrame);
+  }
+
+  /**
+   * Stop chroma key rendering loop
+   */
+  function stopChromaKey() {
+    chromaRunning = false;
+  }
 
   // --- No-button begging texts ---
   const noTexts = [
@@ -99,9 +169,10 @@
       mainContent.style.opacity = '0';
       mainContent.style.transition = 'opacity 0.4s ease';
 
-      // Pause the video
+      // Pause the video & stop chroma key
       if (valentineVideo) {
         valentineVideo.pause();
+        stopChromaKey();
       }
     }, 1000);
 
@@ -112,17 +183,24 @@
   });
 
   // ============================================
-  //  ENSURE VIDEO AUTOPLAY (iOS fallback)
+  //  ENSURE VIDEO AUTOPLAY + START CHROMA KEY
   // ============================================
   document.addEventListener('DOMContentLoaded', function () {
     if (valentineVideo) {
+      // Start chroma key once video has enough data
+      valentineVideo.addEventListener('playing', startChromaKey);
+
       // Attempt to play (catches autoplay rejection on some browsers)
       const playPromise = valentineVideo.play();
       if (playPromise !== undefined) {
         playPromise.catch(function () {
           // Autoplay was prevented — user will need to interact
-          // Video will still show first frame via preload="metadata"
           console.log('Autoplay prevented, user interaction required.');
+          // Start chroma on first user tap
+          document.addEventListener('click', function onFirstClick() {
+            valentineVideo.play().then(startChromaKey).catch(() => {});
+            document.removeEventListener('click', onFirstClick);
+          });
         });
       }
     }

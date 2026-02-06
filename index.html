@@ -19,7 +19,7 @@
     <!-- Heading -->
     <h1 class="title">Would You Be My Valentine? 💕</h1>
 
-    <!-- Video -->
+    <!-- Video (hidden, used as source for chroma key) -->
     <div class="video-wrapper">
       <video
         id="valentineVideo"
@@ -28,10 +28,12 @@
         muted
         playsinline
         preload="metadata"
+        class="video-hidden"
       >
         <source src="assets/video.MP4" type="video/mp4">
         Your browser does not support the video tag.
       </video>
+      <canvas id="chromaCanvas" class="chroma-canvas"></canvas>
     </div>
 
     <!-- Buttons -->
